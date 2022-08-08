@@ -179,7 +179,7 @@ def shot_chart(data, title = "", color = "b", xlim = (-250, 250), ylim = (422.5,
 if __name__ == "__main__":
     print("Menu\n1. Player Shot Chart Generator\n")
     print("2. Display season stats")
-    option = input("Enter a option: ")
+    option = input("Enter option: ")
 
     if(option.strip() == "1"):
         pName = input("\nEnter player's name (e.g. LeBron James): ")
