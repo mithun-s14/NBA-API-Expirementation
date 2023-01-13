@@ -87,7 +87,7 @@ def get_player_shotchartdetail(player_name, season_id):
                                                     context_measure_simple = "FGA").get_data_frames()
     return shotchartlist[0], shotchartlist[1]
 
-#draw
+#draw shot chart
 
 def draw_court(ax = None, color = "blue", lw = 1, outer_lines=False):
     if ax is None:
