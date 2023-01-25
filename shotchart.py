@@ -2,6 +2,8 @@ from re import L
 from matplotlib import patches
 import numpy as np
 import pandas as pd
+import requests
+from bs4 import BeautifulSoup
 
 # NBA_API
 from nba_api.stats.static import players
@@ -176,6 +178,43 @@ def shot_chart(data, title = "", color = "b", xlim = (-250, 250), ylim = (422.5,
 
             return ax
 
+# Method to get a player's stats for the season
+def get_season_stats(player, year):
+
+    # Scraping and saving data
+    url = 'https://www.basketball-reference.com/leagues/NBA_{}_per_game.html'.format(year)
+   
+    r = requests.get(url)
+    r_html = r.text # Get's seasons stats for year and turns into .text
+    soup = BeautifulSoup(r_html,'html.parser') # Parsing with Beautiful Soup object
+    table=soup.find_all(class_="full_table")
+    
+    # Extracting List of column names
+    head=soup.find(class_="thead")
+    
+    column_names_raw=[head.text for item in head][0]
+    
+    column_names_polished=column_names_raw.replace("\n",",").split(",")[2:-1]
+    
+    # Extracting full list of player_data
+    players=[]
+    
+    for i in range(len(table)):
+        player_=[]
+        
+        for td in table[i].find_all("td"):
+            player_.append(td.text)
+    
+        players.append(player_)
+    df=pd.DataFrame(players, columns=column_names_polished).set_index("Player")
+    
+    # Cleaning the player's name from occasional special characters
+    df.index=df.index.str.replace('*', '')
+
+    print(df.loc[player])
+
+
+
 if __name__ == "__main__":
     print("Menu\n1. Player Shot Chart Generator\n")
     print("2. Display season stats")
@@ -193,5 +232,11 @@ if __name__ == "__main__":
 
             plt.rcParams['figure.figsize'] = (12, 11)
             plt.show()
+
+    elif (option.strip() == "2"):
+        pName = input("\nEnter player's name (e.g. LeBron James): ")
+        year = input("\nEnter year (e.g. 2019): ")
+        get_season_stats(pName, year)
+
 
     
