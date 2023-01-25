@@ -1,4 +1,4 @@
-# NBA-API-Expirementation
+# NBA-Stats
 ## About The Project
 A Python project revolving around NBA statistics, as of now the program is able to: 
 1. Generate a player's shot chart in a specific season
