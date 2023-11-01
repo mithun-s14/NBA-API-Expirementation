@@ -136,47 +136,47 @@ def shot_chart(data, title = "", color = "b", xlim = (-250, 250), ylim = (422.5,
              court_color = "white", court_lw = 2, outer_lines = False, flip_court = False, gridsize = None,
              ax = None, despine = False):
 
-            if (ax is None):
-                ax = plt.gca()
-            
-            if not flip_court:
-                ax.set_xlim(xlim)
-                ax.set_ylim(ylim)
-            else:
-                ax.set_xlim(xlim[::-1])
-                ax.set_ylim(ylim[::-1])
-            
-            ax.tick_params(labelbottom = "off", labelleft = "off")
-            ax.set_title(title, fontsize = 18)
+    if (ax is None):
+        ax = plt.gca()
+    
+    if not flip_court:
+        ax.set_xlim(xlim)
+        ax.set_ylim(ylim)
+    else:
+        ax.set_xlim(xlim[::-1])
+        ax.set_ylim(ylim[::-1])
+    
+    ax.tick_params(labelbottom = "off", labelleft = "off")
+    ax.set_title(title, fontsize = 18)
 
-            # draws the court using the draw_court()
-            draw_court(ax, color = line_color, lw = court_lw, outer_lines = outer_lines)
+    # draws the court using the draw_court()
+    draw_court(ax, color = line_color, lw = court_lw, outer_lines = outer_lines)
 
-            # seperate color by make or miss
-            x_missed = data[data['EVENT_TYPE'] == 'Missed Shot']['LOC_X']
-            y_missed = data[data['EVENT_TYPE'] == 'Missed Shot']['LOC_Y']
+    # seperate color by make or miss
+    x_missed = data[data['EVENT_TYPE'] == 'Missed Shot']['LOC_X']
+    y_missed = data[data['EVENT_TYPE'] == 'Missed Shot']['LOC_Y']
 
-            x_made = data[data['EVENT_TYPE'] == 'Made Shot']['LOC_X']
-            y_made = data[data['EVENT_TYPE'] == 'Made Shot']['LOC_Y']
+    x_made = data[data['EVENT_TYPE'] == 'Made Shot']['LOC_X']
+    y_made = data[data['EVENT_TYPE'] == 'Made Shot']['LOC_Y']
 
-            # Plot missed shots
-            ax.scatter(x_missed, y_missed, c ='r', marker = 'x', s = 300, linewidths=3)
-            
-            # Plot made shots
-            ax.scatter(x_made, y_made, facecolors = 'none', edgecolors='g', marker = 'o', s = 100, linewidths=3)
+    # Plot missed shots
+    ax.scatter(x_missed, y_missed, c ='r', marker = 'x', s = 300, linewidths=3)
+    
+    # Plot made shots
+    ax.scatter(x_made, y_made, facecolors = 'none', edgecolors='g', marker = 'o', s = 100, linewidths=3)
 
-            # Set the spines to match the rest of court lines, makes outer_lines
-            for spine in ax.spines:
-                ax.spines[spine].set_lw(court_lw)
-                ax.spines[spine].set_color(line_color)
-            
-            if despine:
-                ax.spines["top"].set_visible(False)
-                ax.spines["bottom"].set_visible(False)
-                ax.right["top"].set_visible(False)
-                ax.left["bottom"].set_visible(False)
+    # Set the spines to match the rest of court lines, makes outer_lines
+    for spine in ax.spines:
+        ax.spines[spine].set_lw(court_lw)
+        ax.spines[spine].set_color(line_color)
+    
+    if despine:
+        ax.spines["top"].set_visible(False)
+        ax.spines["bottom"].set_visible(False)
+        ax.right["top"].set_visible(False)
+        ax.left["bottom"].set_visible(False)
 
-            return ax
+    return ax
 
 # Method to get a player's stats for the season
 def get_season_stats(player, year):
@@ -213,11 +213,22 @@ def get_season_stats(player, year):
 
     print(df.loc[player])
 
+# Uses nba_api to retrieve a given player's last 10 game stats
+def get_last_10(player):
+    player_id = next((x for x in players.get_players() if x.get("full_name") == player), None).get("id") # Find player_id
+    gamelog = pd.concat(playergamelog.PlayerGameLog(player_id, season=SeasonAll.all).get_data_frames()) # Get player's gamelog
+    gamelog["GAME_DATE"] = pd.to_datetime(gamelog["GAME_DATE"], format="%b %d, %Y") # Convert date formatting
+    gamelog = gamelog.query("GAME_DATE.dt.year in [2023, 2024]") # Only search in most recent season
+    gamelog_last_10 = gamelog.head(10) # Get last 10 games
+    gamelog_last_10 = gamelog_last_10.drop(['Player_ID', 'Game_ID', 'SEASON_ID','FG_PCT', 'FG3_PCT', 'VIDEO_AVAILABLE'], axis=1) # Remove unwanted columns
+    print(gamelog_last_10) 
+
 
 
 if __name__ == "__main__":
     print("Menu\n1. Player Shot Chart Generator\n")
-    print("2. Display season stats")
+    print("2. Display season stats\n")
+    print("3. Display season game log")
     option = input("Enter option: ")
 
     if(option.strip() == "1"):
@@ -235,8 +246,11 @@ if __name__ == "__main__":
 
     elif (option.strip() == "2"):
         pName = input("\nEnter player's name (e.g. LeBron James): ")
-        year = input("\nEnter year (e.g. 2019): ")
+        year = input("\nEnter year (e.g. 2019-20): ")
         get_season_stats(pName, year)
-
+    
+    elif (option.strip() == "3"):
+        pName = input("\nEnter player's name (e.g. LeBron James): ")
+        get_last_10(pName)
 
     
